@@ -6,6 +6,7 @@ void rotate_point_z(point_t &point, const point_t &center, const double angle);
 void rotate_point_y(point_t &point, const point_t &center, const double angle);
 void rotate_point_x(point_t &point, const point_t &center, const double angle);
 static double scale_coordinate(double point, double center, double scale_ratio);
+void scale_point_coord(point_t &point, const point_t &center, const parametr_tranform_t &transform);
 
 void init_vertices(vertices_t &vertices)
 {
@@ -93,7 +94,8 @@ errors_t input_vertice(std::ifstream &in, point_t &point)
     return rc;
 }
 
-errors_t move_all_vertices(vertices_t &vertices, const parametr_tranform_t &transform)
+errors_t transform_all_vertices(vertices_t &vertices, const parametr_tranform_t &param_transform,
+                                void (*transform)(point_t&, const parametr_tranform_t&))
 {
     errors_t rc = ERR_OK;
     if(is_vertices_init(vertices) == 0)
@@ -104,11 +106,12 @@ errors_t move_all_vertices(vertices_t &vertices, const parametr_tranform_t &tran
     {
         for(size_t i = 0; i < vertices.count; ++i)
         {
-            move_point(vertices.data[i], transform);
+            transform(vertices.data[i], param_transform);
         }
     }
     return rc;
 }
+
 
 void move_point(point_t &point, const parametr_tranform_t &transform)
 {
@@ -117,33 +120,16 @@ void move_point(point_t &point, const parametr_tranform_t &transform)
     point.z += transform.dz;
 }
 
-errors_t rotate_all_vertices(vertices_t &vertices, const point_t &center, const parametr_tranform_t &transform)
-{
-    errors_t rc = ERR_OK;
-    if(is_vertices_init(vertices) == 0)
-    {
-        rc = ERR_NOT_INIT_FIGURE;
-    }
-    else
-    {
-        for(size_t i = 0; i < vertices.count; ++i)
-        {
-            rotate_point(vertices.data[i], center, transform);
-        }
-    }
-    return rc;
-}
-
 double to_radians(const double &angle)
 {
     return angle * M_PI / 180;
 }
 
-void rotate_point(point_t &point, const point_t &center, const parametr_tranform_t &transform)
+void rotate_point(point_t &point, const parametr_tranform_t &transform)
 {
-    rotate_point_x(point, center, transform.dx);
-    rotate_point_y(point, center, transform.dy);
-    rotate_point_z(point, center, transform.dz);
+    rotate_point_x(point, transform.center, transform.dx);
+    rotate_point_y(point, transform.center, transform.dy);
+    rotate_point_z(point, transform.center, transform.dz);
 }
 
 void rotate_point_x(point_t &point, const point_t &center, const double angle)
@@ -176,24 +162,13 @@ void rotate_point_z(point_t &point, const point_t &center, const double angle)
     point.y = (saved_x - center.x) * sin(rad_angle) + (point.y - center.y) * cos(rad_angle) + center.y;
 }
 
-errors_t scale_all_vertices(vertices_t &vertices, const point_t &center, const parametr_tranform_t &transform)
+
+void scale_point(point_t &point, const parametr_tranform_t &transform)
 {
-    errors_t rc = ERR_OK;
-    if(is_vertices_init(vertices) == 0)
-    {
-        rc = ERR_NOT_INIT_FIGURE;
-    }
-    else
-    {
-        for(size_t i = 0; i < vertices.count; ++i)
-        {
-            scale_point(vertices.data[i], center, transform);
-        }
-    }
-    return rc;
+    scale_point_coord(point, transform.center, transform);
 }
 
-void scale_point(point_t &point, const point_t &center, const parametr_tranform_t &transform)
+void scale_point_coord(point_t &point, const point_t &center, const parametr_tranform_t &transform)
 {
     point.x = scale_coordinate(point.x, center.x, transform.dx);
     point.y = scale_coordinate(point.y, center.y, transform.dy);
@@ -202,7 +177,11 @@ void scale_point(point_t &point, const point_t &center, const parametr_tranform_
 
 static double scale_coordinate(double point, double center, double scale_ratio)
 {
-    return (point - center) * scale_ratio + center;
+    if(scale_ratio != 0)
+    {
+        return (point - center) * scale_ratio + center;
+    }
+    return point;
 }
 
 

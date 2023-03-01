@@ -2,6 +2,7 @@
 #include "error.h"
 #include "figure.h"
 #include <QDebug>
+#include "vertices.h"
 
 errors_t process_event(task_t &task)
 {
@@ -18,17 +19,18 @@ errors_t process_event(task_t &task)
     }
     else if(task.type == transform)
     {
-        rc = move_figure(figure, task.transform);
+        task.transform.center.x = task.transform.center.y = task.transform.center.z = 0;
+        rc= transform_figure(figure, task.transform, move_point);
     }
     else if(task.type == rotate)
     {
-        figure.center.x = figure.center.y = figure.center.z = 0;
-        rc= rotate_figure(figure, task.transform);
+        task.transform.center.x = task.transform.center.y = task.transform.center.z = 0;
+        rc= transform_figure(figure, task.transform, rotate_point);
     }
     else if(task.type == scale)
     {
-        figure.center.x = figure.center.y = figure.center.z = 0;
-        rc= scale_figure(figure, task.transform);
+        task.transform.center.x = task.transform.center.y = task.transform.center.z = 0;
+        rc= transform_figure(figure, task.transform, scale_point);
     }
     task.view.scene->addEllipse(0,0,1,1);
     return rc;

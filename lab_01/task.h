@@ -4,6 +4,7 @@
 #include <iostream>
 #include <QGraphicsScene>
 #include <errors.h>
+#include <point.h>
 
 enum types_task {scale, transform, rotate, read_file, draw};
 
@@ -12,6 +13,7 @@ struct parametr_tranform_t
     double dx;
     double dy;
     double dz;
+    point_t center;
 };
 
 struct file_t

@@ -39,7 +39,22 @@ errors_t get_figure(file_t &file, figure_t &figure)
     return rc;
 }
 
-errors_t move_figure(figure_t &figure, const parametr_tranform_t &transform)
+errors_t transform_figure(figure_t &figure, const parametr_tranform_t param_transform,\
+                          void (*transform)(point_t&, const parametr_tranform_t&))
+{
+    errors_t rc = ERR_OK;
+    if(is_edges_init(figure.all_edge) && is_vertices_init(figure.all_vertice))
+    {
+        rc = transform_all_vertices(figure.all_vertice, param_transform, transform);
+    }
+    else
+    {
+        rc = ERR_NOT_INIT_FIGURE;
+    }
+    return rc;
+}
+
+/*errors_t move_figure(figure_t &figure, const parametr_tranform_t &transform)
 {
     errors_t rc = ERR_OK;
     if(is_edges_init(figure.all_edge) && is_vertices_init(figure.all_vertice))
@@ -79,7 +94,7 @@ errors_t scale_figure(figure_t &figure, const parametr_tranform_t &transform)
        rc = ERR_NOT_INIT_FIGURE;
     }
     return rc;
-}
+}*/
 
 
 

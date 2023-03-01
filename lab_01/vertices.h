@@ -14,10 +14,9 @@ void free_vertices(vertices_t &vertices);
 errors_t input_vertice(std::ifstream &in, point_t &point);
 int is_vertices_init(const vertices_t &vertices);
 void move_point(point_t &point, const parametr_tranform_t &transform);
-errors_t move_all_vertices(vertices_t &vertices, const parametr_tranform_t &transform);
-void rotate_point(point_t &point, const point_t &center, const parametr_tranform_t &transform);
-errors_t rotate_all_vertices(vertices_t &vertices, const point_t &center, const parametr_tranform_t &transform);
-void scale_point(point_t &point, const point_t &center, const parametr_tranform_t &transform);
-errors_t scale_all_vertices(vertices_t &vertices, const point_t &center, const parametr_tranform_t &transform);
+void rotate_point(point_t &point, const parametr_tranform_t &transform);
+void scale_point(point_t &point, const parametr_tranform_t &transform);
 
+errors_t transform_all_vertices(vertices_t &vertices, const parametr_tranform_t &param_transform,
+                                void (*transform)(point_t&, const parametr_tranform_t&));
 #endif // VERTICES_H

@@ -21,6 +21,7 @@ HEADERS += \
     errors.h \
     figure.h \
     mainwindow.h \
+    point.h \
     task.h \
     vertices.h
 

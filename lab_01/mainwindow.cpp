@@ -32,9 +32,9 @@ void MainWindow::on_load_file_clicked()
     task.view.scene = ui->graphicsView->scene();
     task.view.scene->addEllipse(0,0,1,1);
 
-    //QString filename = QFileDialog::getOpenFileName(0, "Open", "../", "*.txt");
-    //task.file.path_to_file = filename.toStdString();
-    task.file.path_to_file = "../lab_01/data.txt";
+    QString filename = QFileDialog::getOpenFileName(0, "Open", "../", "*.txt");
+    task.file.path_to_file = filename.toStdString();
+    //task.file.path_to_file = "../lab_01/data.txt";
 
     errors_t rc = process_event(task);
     qDebug() << rc;
