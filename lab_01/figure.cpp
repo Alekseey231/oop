@@ -1,35 +1,43 @@
 #include "figure.h"
-#include "task.h"
 #include "errors.h"
-#include <vertices.h>
-#include <fstream>
-#include <edges.h>
+#include "task.h"
 #include <QDebug>
+#include <edges.h>
+#include <fstream>
+#include <vertices.h>
 
-void init_figure(figure_t &figure)
+figure_t &init_figure()
 {
+    static figure_t figure;
     init_edges(figure.all_edge);
     init_vertices(figure.all_vertice);
+    return figure;
 }
 
-//TODO добавить провреки на nullptr file и что figure пуста
-//возможно инит надо будет перенести
-errors_t get_figure(file_t &file, figure_t &figure)
+errors_t input_figure(file_t &file, figure_t &figure)
 {
     errors_t rc = ERR_OK;
+
+    if (is_vertices_init(figure.all_vertice) || is_edges_init(figure.all_edge))
+    {
+        rc = ERR_FIGURE_ALWAYS_INIT;
+        return rc;
+    }
+
     std::ifstream in(file.path_to_file);
-    init_figure(figure);
-    if(in.is_open())
+
+    if (in.is_open())
     {
         rc = input_all_vertices(in, figure.all_vertice);
-        if(rc == ERR_OK)
+        if (rc == ERR_OK)
         {
             rc = input_all_edges(in, figure.all_edge);
-            if(rc != ERR_OK)
+            if (rc != ERR_OK)
             {
                 free_vertices(figure.all_vertice);
             }
         }
+        in.close();
     }
     else
     {
@@ -39,11 +47,11 @@ errors_t get_figure(file_t &file, figure_t &figure)
     return rc;
 }
 
-errors_t transform_figure(figure_t &figure, const parametr_tranform_t param_transform,\
-                          void (*transform)(point_t&, const parametr_tranform_t&))
+errors_t transform_figure(figure_t &figure, const parametr_tranform_t &param_transform,
+                          void (*transform)(point_t &, const point_t &, const transformation_t &))
 {
     errors_t rc = ERR_OK;
-    if(is_edges_init(figure.all_edge) && is_vertices_init(figure.all_vertice))
+    if (is_edges_init(figure.all_edge) && is_vertices_init(figure.all_vertice))
     {
         rc = transform_all_vertices(figure.all_vertice, param_transform, transform);
     }
@@ -54,64 +62,20 @@ errors_t transform_figure(figure_t &figure, const parametr_tranform_t param_tran
     return rc;
 }
 
-/*errors_t move_figure(figure_t &figure, const parametr_tranform_t &transform)
-{
-    errors_t rc = ERR_OK;
-    if(is_edges_init(figure.all_edge) && is_vertices_init(figure.all_vertice))
-    {
-        rc = move_all_vertices(figure.all_vertice, transform);
-    }
-    else
-    {
-        rc = ERR_NOT_INIT_FIGURE;
-    }
-    return rc;
-}
-
-errors_t rotate_figure(figure_t &figure, const parametr_tranform_t &transform)
-{
-    errors_t rc = ERR_OK;
-    if(is_edges_init(figure.all_edge) && is_vertices_init(figure.all_vertice))
-    {
-        rc = rotate_all_vertices(figure.all_vertice, figure.center, transform);
-    }
-    else
-    {
-       rc = ERR_NOT_INIT_FIGURE;
-    }
-    return rc;
-}
-
-errors_t scale_figure(figure_t &figure, const parametr_tranform_t &transform)
-{
-    errors_t rc = ERR_OK;
-    if(is_edges_init(figure.all_edge) && is_vertices_init(figure.all_vertice))
-    {
-        rc = scale_all_vertices(figure.all_vertice, figure.center, transform);
-    }
-    else
-    {
-       rc = ERR_NOT_INIT_FIGURE;
-    }
-    return rc;
-}*/
-
-
-
 // Нужна ли тут проверка инициализации полей?
-errors_t draw_figure(view_t &view, figure_t &figure)
+errors_t draw_figure(view_t &view, const figure_t &figure)
 {
     errors_t rc = ERR_OK;
-    if(is_scene_init(view) == 0)
+    if (is_scene_init(view) == 0)
     {
         rc = ERR_NOT_INIT_SCENE;
     }
-    if(rc == ERR_OK)
+    if (rc == ERR_OK)
     {
         rc = clear_scene(view);
     }
 
-    if(rc == ERR_OK)
+    if (rc == ERR_OK)
     {
         rc = draw_all_edges(figure.all_edge, figure.all_vertice, view);
     }
@@ -127,7 +91,7 @@ void delete_figure(figure_t &figure)
 errors_t clear_scene(view_t &view)
 {
     errors_t rc = ERR_OK;
-    if(is_scene_init(view) == 0)
+    if (is_scene_init(view) == 0)
     {
         rc = ERR_NOT_INIT_SCENE;
     }

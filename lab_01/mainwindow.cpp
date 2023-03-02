@@ -2,102 +2,102 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 #include <QFileDialog>
-#include <task.h>
+#include <QMessageBox>
 #include <iostream>
+#include <task.h>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     QGraphicsScene *scene = new QGraphicsScene();
     ui->graphicsView->setScene(scene);
-    //ui->graphicsView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui->graphicsView->scene();
+    task_t task;
+    init_task(task);
+    task.type = QUIT;
+    process_event(task);
+    // delete ui->graphicsView->scene();
     delete ui;
 }
 
-
-
+//реализовано следующее поведение: если юзер выбрал некорректный файл, текущая фигура очищается
 void MainWindow::on_load_file_clicked()
 {
     task_t task;
-    task.type = read_file;
-
+    init_task(task);
+    task.type = READ_FILE;
     task.view.scene = ui->graphicsView->scene();
-    task.view.scene->addEllipse(0,0,1,1);
-
-    QString filename = QFileDialog::getOpenFileName(0, "Open", "../", "*.txt");
+    QString filename = QFileDialog::getOpenFileName(0, "Open", "../lab_01/", "*.txt");
     task.file.path_to_file = filename.toStdString();
-    //task.file.path_to_file = "../lab_01/data.txt";
-
-    errors_t rc = process_event(task);
-    qDebug() << rc;
-    if(rc == ERR_OK)
+    if (filename.length() != 0)
     {
-        task.type = draw;
-        process_event(task);
+        errors_t rc = process_event(task);
+        if (rc == ERR_OK)
+        {
+            task.type = DRAW;
+            rc = process_event(task);
+        }
+        process_error(rc);
     }
 }
-
-
 
 void MainWindow::on_move_clicked()
 {
     task_t task;
-    task.type = transform;
+    init_task(task);
+    task.type = TRANSFORM;
     task.view.scene = ui->graphicsView->scene();
     // TODO Add double validator
     // TODO Check empty input - zero
-    task.transform.dx = ui->move_dx->text().toDouble();
-    task.transform.dy = ui->move_dy->text().toDouble();
-    task.transform.dz = ui->move_dz->text().toDouble();
+    task.transform.transform.dx = ui->move_dx->text().toDouble();
+    task.transform.transform.dy = ui->move_dy->text().toDouble();
+    task.transform.transform.dz = ui->move_dz->text().toDouble();
     auto rc = process_event(task);
-    if(rc == ERR_OK)
+    if (rc == ERR_OK)
     {
-        task.type = draw;
+        task.type = DRAW;
         rc = process_event(task);
     }
+    process_error(rc);
 }
-
 
 void MainWindow::on_rotate_clicked()
 {
     task_t task;
-    task.type = rotate;
+    init_task(task);
+    task.type = ROTATE;
     task.view.scene = ui->graphicsView->scene();
-    task.transform.dx = ui->angle_dx->text().toDouble();
-    task.transform.dy = ui->angle_dy->text().toDouble();
-    task.transform.dz = ui->angle_dz->text().toDouble();
+    task.transform.transform.dx = ui->angle_dx->text().toDouble();
+    task.transform.transform.dy = ui->angle_dy->text().toDouble();
+    task.transform.transform.dz = ui->angle_dz->text().toDouble();
     auto rc = process_event(task);
-    if(rc == ERR_OK)
+    if (rc == ERR_OK)
     {
-        task.type = draw;
+        task.type = DRAW;
         rc = process_event(task);
-        //добавить вывод сообщений о ошибках
     }
+    process_error(rc);
 }
-
 
 void MainWindow::on_scale_clicked()
 {
     task_t task;
-    task.type = scale;
+    init_task(task);
+    task.type = SCALE;
     task.view.scene = ui->graphicsView->scene();
-    task.transform.dx = ui->scale_dx->text().toDouble();
-    task.transform.dy = ui->scale_dy->text().toDouble();
-    task.transform.dz = ui->scale_dz->text().toDouble();
-    auto rc = process_event(task);
-    if(rc == ERR_OK)
-    {
-        task.type = draw;
-        rc = process_event(task);
-        //добавить вывод сообщений о ошибках
-    }
-}
+    task.transform.transform.dx = ui->scale_dx->text().toDouble();
+    task.transform.transform.dy = ui->scale_dy->text().toDouble();
+    task.transform.transform.dz = ui->scale_dz->text().toDouble();
 
+    // TODO check scale != 0
+    auto rc = process_event(task);
+    if (rc == ERR_OK)
+    {
+        task.type = DRAW;
+        rc = process_event(task);
+    }
+    process_error(rc);
+}

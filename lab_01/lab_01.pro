@@ -10,6 +10,7 @@ CONFIG += c++11
 
 SOURCES += \
     edges.cpp \
+    errors.cpp \
     figure.cpp \
     main.cpp \
     mainwindow.cpp \

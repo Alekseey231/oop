@@ -1,18 +1,31 @@
 #ifndef TASK_H
 #define TASK_H
 
-#include <iostream>
 #include <QGraphicsScene>
 #include <errors.h>
+#include <iostream>
 #include <point.h>
 
-enum types_task {scale, transform, rotate, read_file, draw};
+enum types_task
+{
+    SCALE,
+    TRANSFORM,
+    ROTATE,
+    READ_FILE,
+    DRAW,
+    QUIT
+};
 
-struct parametr_tranform_t
+struct transformation_t
 {
     double dx;
     double dy;
     double dz;
+};
+
+struct parametr_tranform_t
+{
+    transformation_t transform;
     point_t center;
 };
 
@@ -35,5 +48,6 @@ struct task_t
 };
 
 errors_t process_event(task_t &task);
+void init_task(task_t &task);
 
 #endif // TASK_H
