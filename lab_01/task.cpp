@@ -18,27 +18,26 @@ errors_t process_event(task_t &task)
         rc = draw_figure(task.view, figure);
         break;
     case TRANSFORM:
-        rc = transform_figure(figure, task.transform, move_point);
+        rc = transform_figure(figure, task.transformation_param, move_point);
         break;
     case ROTATE:
-        rc = transform_figure(figure, task.transform, rotate_point);
+        rc = transform_figure(figure, task.transformation_param, rotate_point);
         break;
     case SCALE:
-        rc = transform_figure(figure, task.transform, scale_point);
+        rc = transform_figure(figure, task.transformation_param, scale_point);
         break;
     case QUIT:
         delete_figure(figure);
     }
-    if (task.type != QUIT)
-    {
-        task.view.scene->addEllipse(0, 0, 1, 1);
-    }
+    task.view.scene->addEllipse(0, 0, 1, 1);
     return rc;
 }
 
 void init_task(task_t &task)
 {
-    task.transform.center.x = task.transform.center.y = task.transform.center.z = 0;
-    task.transform.transform.dx = task.transform.transform.dy = task.transform.transform.dz = 0;
+    task.transformation_param.center.x = task.transformation_param.center.y = task.transformation_param.center.z = 0;
+    task.transformation_param.center.x = task.transformation_param.center.y = task.transformation_param.center.z = 0;
+    task.transformation_param.transform.dx = task.transformation_param.transform.dy =
+        task.transformation_param.transform.dz = 0;
     task.view.scene = nullptr;
 }

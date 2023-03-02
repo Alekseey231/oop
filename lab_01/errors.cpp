@@ -29,11 +29,20 @@ void process_error(errors_t rc)
     case ERR_NOT_INIT_FILE:
         QMessageBox::critical(NULL, "Error", "Возникла ошибка: файл не выбран");
         break;
+    case ERR_NOT_INIT_EDGES:
+        QMessageBox::critical(NULL, "Error", "Возникла ошибка: ребра не инициализированы");
+        break;
     case ERR_FIGURE_ALWAYS_INIT:
         QMessageBox::critical(NULL, "Error", "Возникла ошибка: фигура уже инциализированна");
         break;
     case ERR_ZERO_SCALE_VALUE:
         QMessageBox::critical(NULL, "Error", "Возникла ошибка: коэффициенты масштабирования не могут быть равны 0");
+        break;
+    case ERR_DUBLICATE_EDGE:
+        QMessageBox::critical(NULL, "Error", "Возникла ошибка: ребра не могут дублироваться");
+        break;
+    case ERR_INDEX_EDGE_TOO_LARGE:
+        QMessageBox::critical(NULL, "Error", "Возникла ошибка: индекс вершины в ребре превышает число вершин");
         break;
     }
 }

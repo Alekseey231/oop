@@ -23,7 +23,7 @@ struct transformation_t
     double dz;
 };
 
-struct parametr_tranform_t
+struct transformation_parametrs_t
 {
     transformation_t transform;
     point_t center;
@@ -44,7 +44,7 @@ struct task_t
     enum types_task type;
     file_t file;
     view_t view;
-    parametr_tranform_t transform;
+    transformation_parametrs_t transformation_param;
 };
 
 errors_t process_event(task_t &task);

@@ -10,6 +10,11 @@ static errors_t input_edge(std::ifstream &in, edge_t &edge);
 
 static void draw_edge(const edge_t &edge, const vertices_t &vertices, const view_t &view);
 
+static errors_t check_index_edge(const size_t count_vertices, const edge_t &edge);
+static errors_t check_duplicate_edge(const edges_t &edges, const edge_t &edge);
+
+static int compare_edges(const edge_t &first_edge, const edge_t &second_edge);
+
 void init_edges(edges_t &edges)
 {
     edges.count = 0;
@@ -45,8 +50,6 @@ errors_t input_all_edges(std::ifstream &in, edges_t &edges)
     return rc;
 }
 
-//возможно потом где-то надо проверить, что число ребер хотя бы больше числа вершин
-//и что все индексы допустимые
 static errors_t input_count_edges(std::ifstream &in, size_t &count)
 {
     errors_t rc = ERR_OK;
@@ -101,6 +104,64 @@ static errors_t input_edge(std::ifstream &in, edge_t &edge)
         rc = ERR_GET_VALUE;
     }
     return rc;
+}
+
+errors_t check_correct_edges(const edges_t &edges, const vertices_t &vertices)
+{
+    errors_t rc = ERR_OK;
+    if (!is_edges_init(edges))
+    {
+        rc = ERR_NOT_INIT_EDGES;
+    }
+
+    for (size_t i = 0; i < edges.count && rc == ERR_OK; ++i)
+    {
+        rc = check_index_edge(vertices.count, edges.data[i]);
+        if (rc == ERR_OK)
+        {
+            rc = check_duplicate_edge(edges, edges.data[i]);
+        }
+    }
+    return rc;
+}
+
+static errors_t check_index_edge(const size_t count_vertices, const edge_t &edge)
+{
+    errors_t rc = ERR_OK;
+    if ((edge.index_vertice_end > (count_vertices - 1)) || (edge.index_vertice_start > (count_vertices - 1)))
+    {
+        rc = ERR_INDEX_EDGE_TOO_LARGE;
+    }
+    return rc;
+}
+
+static errors_t check_duplicate_edge(const edges_t &edges, const edge_t &edge)
+{
+    errors_t rc = ERR_OK;
+
+    if (!is_edges_init(edges))
+    {
+        rc = ERR_NOT_INIT_EDGES;
+    }
+    unsigned int count_replay = 0;
+    for (size_t i = 0; i < edges.count && rc == ERR_OK; ++i)
+    {
+        if (compare_edges(edge, edges.data[i]))
+        {
+            ++count_replay;
+        }
+        if (count_replay == 2)
+        {
+            rc = ERR_DUBLICATE_EDGE;
+        }
+    }
+    return rc;
+}
+
+static int compare_edges(const edge_t &first_edge, const edge_t &second_edge)
+{
+    return (first_edge.index_vertice_end == second_edge.index_vertice_end) &&
+           (first_edge.index_vertice_start == second_edge.index_vertice_start);
 }
 
 //возможно стоит перенести в другой файл

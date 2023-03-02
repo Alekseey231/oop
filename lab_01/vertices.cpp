@@ -4,7 +4,7 @@
 
 static errors_t input_count_vertices(std::ifstream &in, size_t &count);
 static errors_t input_vertices(std::ifstream &in, vertices_t &vertices);
-static errors_t input_vertice(std::ifstream &in, point_t &point);
+static errors_t input_one_vertice(std::ifstream &in, point_t &point);
 
 static void rotate_point_z(point_t &point, const point_t &center, const double angle);
 static void rotate_point_y(point_t &point, const point_t &center, const double angle);
@@ -81,12 +81,12 @@ static errors_t input_vertices(std::ifstream &in, vertices_t &vertices)
     errors_t rc = ERR_OK;
     for (size_t i = 0; i < vertices.count && rc == ERR_OK; ++i)
     {
-        rc = input_vertice(in, vertices.data[i]);
+        rc = input_one_vertice(in, vertices.data[i]);
     }
     return rc;
 }
 
-static errors_t input_vertice(std::ifstream &in, point_t &point)
+static errors_t input_one_vertice(std::ifstream &in, point_t &point)
 {
     errors_t rc = ERR_OK;
     in >> point.x;
@@ -99,7 +99,7 @@ static errors_t input_vertice(std::ifstream &in, point_t &point)
     return rc;
 }
 
-errors_t transform_all_vertices(vertices_t &vertices, const parametr_tranform_t &param_transform,
+errors_t transform_all_vertices(vertices_t &vertices, const transformation_parametrs_t &param_transform,
                                 void (*transform)(point_t &, const point_t &, const transformation_t &))
 {
     errors_t rc = ERR_OK;
@@ -129,6 +129,7 @@ static double to_radians(const double &angle)
     return angle * M_PI / 180;
 }
 
+//возможно угол стоит посчитать на верхнем уровне, и просто передавать вниз, чтобы сократить объем повторных вычислений
 void rotate_point(point_t &point, const point_t &center, const transformation_t &transform)
 {
     rotate_point_x(point, center, transform.dx);

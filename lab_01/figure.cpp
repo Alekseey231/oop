@@ -38,6 +38,15 @@ errors_t input_figure(file_t &file, figure_t &figure)
             }
         }
         in.close();
+
+        if (rc == ERR_OK)
+        {
+            rc = check_correct_figure(figure);
+            if (rc != ERR_OK)
+            {
+                delete_figure(figure);
+            }
+        }
     }
     else
     {
@@ -47,7 +56,21 @@ errors_t input_figure(file_t &file, figure_t &figure)
     return rc;
 }
 
-errors_t transform_figure(figure_t &figure, const parametr_tranform_t &param_transform,
+errors_t check_correct_figure(const figure_t &figure)
+{
+    errors_t rc = ERR_OK;
+    if (!is_vertices_init(figure.all_vertice) || !is_edges_init(figure.all_edge))
+    {
+        rc = ERR_NOT_INIT_FIGURE;
+    }
+    else
+    {
+        rc = check_correct_edges(figure.all_edge, figure.all_vertice);
+    }
+    return rc;
+}
+
+errors_t transform_figure(figure_t &figure, const transformation_parametrs_t &param_transform,
                           void (*transform)(point_t &, const point_t &, const transformation_t &))
 {
     errors_t rc = ERR_OK;

@@ -52,9 +52,9 @@ void MainWindow::on_move_clicked()
     task.view.scene = ui->graphicsView->scene();
     // TODO Add double validator
     // TODO Check empty input - zero
-    task.transform.transform.dx = ui->move_dx->text().toDouble();
-    task.transform.transform.dy = ui->move_dy->text().toDouble();
-    task.transform.transform.dz = ui->move_dz->text().toDouble();
+    task.transformation_param.transform.dx = ui->move_dx->text().toDouble();
+    task.transformation_param.transform.dy = ui->move_dy->text().toDouble();
+    task.transformation_param.transform.dz = ui->move_dz->text().toDouble();
     auto rc = process_event(task);
     if (rc == ERR_OK)
     {
@@ -70,9 +70,9 @@ void MainWindow::on_rotate_clicked()
     init_task(task);
     task.type = ROTATE;
     task.view.scene = ui->graphicsView->scene();
-    task.transform.transform.dx = ui->angle_dx->text().toDouble();
-    task.transform.transform.dy = ui->angle_dy->text().toDouble();
-    task.transform.transform.dz = ui->angle_dz->text().toDouble();
+    task.transformation_param.transform.dx = ui->angle_dx->text().toDouble();
+    task.transformation_param.transform.dy = ui->angle_dy->text().toDouble();
+    task.transformation_param.transform.dz = ui->angle_dz->text().toDouble();
     auto rc = process_event(task);
     if (rc == ERR_OK)
     {
@@ -88,9 +88,9 @@ void MainWindow::on_scale_clicked()
     init_task(task);
     task.type = SCALE;
     task.view.scene = ui->graphicsView->scene();
-    task.transform.transform.dx = ui->scale_dx->text().toDouble();
-    task.transform.transform.dy = ui->scale_dy->text().toDouble();
-    task.transform.transform.dz = ui->scale_dz->text().toDouble();
+    task.transformation_param.transform.dx = ui->scale_dx->text().toDouble();
+    task.transformation_param.transform.dy = ui->scale_dy->text().toDouble();
+    task.transformation_param.transform.dz = ui->scale_dz->text().toDouble();
 
     // TODO check scale != 0
     auto rc = process_event(task);

@@ -24,6 +24,6 @@ void move_point(point_t &point, const point_t &center, const transformation_t &t
 void rotate_point(point_t &point, const point_t &center, const transformation_t &transform);
 void scale_point(point_t &point, const point_t &center, const transformation_t &transform);
 
-errors_t transform_all_vertices(vertices_t &vertices, const parametr_tranform_t &param_transform,
+errors_t transform_all_vertices(vertices_t &vertices, const transformation_parametrs_t &param_transform,
                                 void (*transform)(point_t &, const point_t &, const transformation_t &));
 #endif // VERTICES_H
