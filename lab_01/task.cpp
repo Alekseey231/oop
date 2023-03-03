@@ -2,7 +2,11 @@
 #include "error.h"
 #include "figure.h"
 #include "vertices.h"
-#include <QDebug>
+
+static void set_defoult_transformation(transformation_parametrs_t &transformation);
+static void set_defoult_transform(transformation_t &transform);
+static void set_defoult_center(point_t &center);
+static void set_defoult_view(view_t &view);
 
 errors_t process_event(task_t &task)
 {
@@ -29,15 +33,32 @@ errors_t process_event(task_t &task)
     case QUIT:
         delete_figure(figure);
     }
-    task.view.scene->addEllipse(0, 0, 1, 1);
     return rc;
 }
 
 void init_task(task_t &task)
 {
-    task.transformation_param.center.x = task.transformation_param.center.y = task.transformation_param.center.z = 0;
-    task.transformation_param.center.x = task.transformation_param.center.y = task.transformation_param.center.z = 0;
-    task.transformation_param.transform.dx = task.transformation_param.transform.dy =
-        task.transformation_param.transform.dz = 0;
-    task.view.scene = nullptr;
+    set_defoult_transformation(task.transformation_param);
+    set_defoult_view(task.view);
+}
+
+static void set_defoult_transformation(transformation_parametrs_t &transformation)
+{
+    set_defoult_transform(transformation.transform);
+    set_defoult_center(transformation.center);
+}
+
+static void set_defoult_center(point_t &center)
+{
+    center.x = center.y = center.z = 0;
+}
+
+static void set_defoult_transform(transformation_t &transform)
+{
+    transform.dx = transform.dy = transform.dz = 0;
+}
+
+static void set_defoult_view(view_t &view)
+{
+    view.scene = nullptr;
 }

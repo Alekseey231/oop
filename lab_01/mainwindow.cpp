@@ -19,7 +19,6 @@ MainWindow::~MainWindow()
     init_task(task);
     task.type = QUIT;
     process_event(task);
-    // delete ui->graphicsView->scene();
     delete ui;
 }
 
@@ -50,11 +49,11 @@ void MainWindow::on_move_clicked()
     init_task(task);
     task.type = TRANSFORM;
     task.view.scene = ui->graphicsView->scene();
-    // TODO Add double validator
-    // TODO Check empty input - zero
-    task.transformation_param.transform.dx = ui->move_dx->text().toDouble();
-    task.transformation_param.transform.dy = ui->move_dy->text().toDouble();
-    task.transformation_param.transform.dz = ui->move_dz->text().toDouble();
+
+    transformation_t transformation = {.dx = ui->move_dx->text().toDouble(),
+                                       .dy = ui->move_dy->text().toDouble(),
+                                       .dz = ui->move_dz->text().toDouble()};
+    task.transformation_param.transform = transformation;
     auto rc = process_event(task);
     if (rc == ERR_OK)
     {
@@ -70,9 +69,10 @@ void MainWindow::on_rotate_clicked()
     init_task(task);
     task.type = ROTATE;
     task.view.scene = ui->graphicsView->scene();
-    task.transformation_param.transform.dx = ui->angle_dx->text().toDouble();
-    task.transformation_param.transform.dy = ui->angle_dy->text().toDouble();
-    task.transformation_param.transform.dz = ui->angle_dz->text().toDouble();
+    transformation_t transformation = {.dx = ui->angle_dx->text().toDouble(),
+                                       .dy = ui->angle_dy->text().toDouble(),
+                                       .dz = ui->angle_dz->text().toDouble()};
+    task.transformation_param.transform = transformation;
     auto rc = process_event(task);
     if (rc == ERR_OK)
     {
@@ -84,20 +84,29 @@ void MainWindow::on_rotate_clicked()
 
 void MainWindow::on_scale_clicked()
 {
+    errors_t rc = ERR_OK;
     task_t task;
     init_task(task);
     task.type = SCALE;
     task.view.scene = ui->graphicsView->scene();
-    task.transformation_param.transform.dx = ui->scale_dx->text().toDouble();
-    task.transformation_param.transform.dy = ui->scale_dy->text().toDouble();
-    task.transformation_param.transform.dz = ui->scale_dz->text().toDouble();
+    transformation_t transformation = {.dx = ui->scale_dx->text().toDouble(),
+                                       .dy = ui->scale_dy->text().toDouble(),
+                                       .dz = ui->scale_dz->text().toDouble()};
+    if (transformation.dx == 0 || transformation.dy == 0 || transformation.dz == 0)
+    {
+        rc = ERR_ZERO_SCALE_VALUE;
+    }
 
-    // TODO check scale != 0
-    auto rc = process_event(task);
     if (rc == ERR_OK)
     {
-        task.type = DRAW;
+        task.transformation_param.transform = transformation;
+
         rc = process_event(task);
+        if (rc == ERR_OK)
+        {
+            task.type = DRAW;
+            rc = process_event(task);
+        }
     }
     process_error(rc);
 }

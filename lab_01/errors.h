@@ -16,7 +16,9 @@ enum errors_t
     ERR_FIGURE_ALWAYS_INIT,
     ERR_ZERO_SCALE_VALUE,
     ERR_INDEX_EDGE_TOO_LARGE,
-    ERR_DUBLICATE_EDGE
+    ERR_DUBLICATE_EDGE,
+    ERR_ALLOCATE_MEM,
+    ERR_INCORRECT_COUNT
 };
 void process_error(errors_t rc);
 

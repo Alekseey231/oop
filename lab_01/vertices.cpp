@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <cmath>
+#include <cstring>
 #include <vertices.h>
 
 static errors_t input_count_vertices(std::ifstream &in, size_t &count);
@@ -30,14 +31,21 @@ errors_t input_all_vertices(std::ifstream &in, vertices_t &vertices)
     {
         rc = ERR_FIGURE_ALWAYS_INIT;
     }
+    else if (!in.is_open())
+    {
+        rc = ERR_OPEN_FILE;
+    }
 
     if (rc == ERR_OK)
     {
         rc = input_count_vertices(in, vertices.count);
         if (rc == ERR_OK)
         {
-            allocate_vertices(vertices);
-            rc = input_vertices(in, vertices);
+            rc = allocate_vertices(vertices);
+            if (rc == ERR_OK)
+            {
+                rc = input_vertices(in, vertices);
+            }
             if (rc != ERR_OK)
             {
                 free_vertices(vertices);
@@ -47,20 +55,31 @@ errors_t input_all_vertices(std::ifstream &in, vertices_t &vertices)
     return rc;
 }
 
-void allocate_vertices(vertices_t &vertices)
+errors_t allocate_vertices(vertices_t &vertices)
 {
-    vertices.data = new point_t[vertices.count];
+    errors_t rc = ERR_OK;
+    vertices.data = (point_t *)malloc(sizeof(point_t) * vertices.count);
+    if (vertices.data == nullptr)
+    {
+        rc = ERR_ALLOCATE_MEM;
+    }
+    return rc;
 }
 
 void free_vertices(vertices_t &vertices)
 {
-    delete[] vertices.data;
+    free(vertices.data);
     vertices.data = nullptr;
 }
 
 static errors_t input_count_vertices(std::ifstream &in, size_t &count)
 {
     errors_t rc = ERR_OK;
+    if (!in.is_open())
+    {
+        rc = ERR_OPEN_FILE;
+        return rc;
+    }
     in >> count;
     if (in.good())
     {
@@ -79,6 +98,10 @@ static errors_t input_count_vertices(std::ifstream &in, size_t &count)
 static errors_t input_vertices(std::ifstream &in, vertices_t &vertices)
 {
     errors_t rc = ERR_OK;
+    if (!in.is_open())
+    {
+        rc = ERR_OPEN_FILE;
+    }
     for (size_t i = 0; i < vertices.count && rc == ERR_OK; ++i)
     {
         rc = input_one_vertice(in, vertices.data[i]);
@@ -89,6 +112,11 @@ static errors_t input_vertices(std::ifstream &in, vertices_t &vertices)
 static errors_t input_one_vertice(std::ifstream &in, point_t &point)
 {
     errors_t rc = ERR_OK;
+    if (!in.is_open())
+    {
+        rc = ERR_OPEN_FILE;
+        return rc;
+    }
     in >> point.x;
     in >> point.y;
     in >> point.z;

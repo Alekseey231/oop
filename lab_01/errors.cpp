@@ -44,5 +44,11 @@ void process_error(errors_t rc)
     case ERR_INDEX_EDGE_TOO_LARGE:
         QMessageBox::critical(NULL, "Error", "Возникла ошибка: индекс вершины в ребре превышает число вершин");
         break;
+    case ERR_ALLOCATE_MEM:
+        QMessageBox::critical(NULL, "Error", "Возникла ошибка выделения памяти");
+        break;
+    case ERR_NOT_INIT_VERTICES:
+        QMessageBox::critical(NULL, "Error", "Возникла ошибка: вершины не инициализированны");
+        break;
     }
 }

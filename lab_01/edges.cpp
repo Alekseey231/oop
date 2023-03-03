@@ -1,7 +1,6 @@
-#include <QDebug>
+#include <cstring>
 #include <edges.h>
 #include <errors.h>
-#include <figure.h>
 #include <fstream>
 
 static errors_t input_count_edges(std::ifstream &in, size_t &count);
@@ -33,14 +32,21 @@ errors_t input_all_edges(std::ifstream &in, edges_t &edges)
     {
         rc = ERR_FIGURE_ALWAYS_INIT;
     }
+    else if (!in.is_open())
+    {
+        rc = ERR_OPEN_FILE;
+    }
 
     if (rc == ERR_OK)
     {
         rc = input_count_edges(in, edges.count);
         if (rc == ERR_OK)
         {
-            allocate_edges(edges);
-            rc = input_edges(in, edges);
+            rc = allocate_edges(edges);
+            if (rc == ERR_OK)
+            {
+                rc = input_edges(in, edges);
+            }
             if (rc != ERR_OK)
             {
                 free_edges(edges);
@@ -53,6 +59,12 @@ errors_t input_all_edges(std::ifstream &in, edges_t &edges)
 static errors_t input_count_edges(std::ifstream &in, size_t &count)
 {
     errors_t rc = ERR_OK;
+    if (!in.is_open())
+    {
+        rc = ERR_OPEN_FILE;
+        return rc;
+    }
+
     in >> count;
     if (in.good())
     {
@@ -69,21 +81,30 @@ static errors_t input_count_edges(std::ifstream &in, size_t &count)
     return rc;
 }
 
-//возможно и здесь на init добавить проверку
-void allocate_edges(edges_t &edges)
+errors_t allocate_edges(edges_t &edges)
 {
-    edges.data = new edge_t[edges.count];
+    errors_t rc = ERR_OK;
+    edges.data = (edge_t *)malloc(sizeof(edge_t) * edges.count);
+    if (edges.data == NULL)
+    {
+        rc = ERR_ALLOCATE_MEM;
+    }
+    return rc;
 }
 
 void free_edges(edges_t &edges)
 {
-    delete[] edges.data;
+    free(edges.data);
     edges.data = nullptr;
 }
 
 static errors_t input_edges(std::ifstream &in, edges_t &edges)
 {
     errors_t rc = ERR_OK;
+    if (!in.is_open())
+    {
+        rc = ERR_OPEN_FILE;
+    }
     for (size_t i = 0; i < edges.count && rc == ERR_OK; ++i)
     {
         rc = input_edge(in, edges.data[i]);
@@ -94,6 +115,11 @@ static errors_t input_edges(std::ifstream &in, edges_t &edges)
 static errors_t input_edge(std::ifstream &in, edge_t &edge)
 {
     errors_t rc = ERR_OK;
+    if (!in.is_open())
+    {
+        rc = ERR_OPEN_FILE;
+        return rc;
+    }
     in >> edge.index_vertice_start;
     if (in.good())
     {
@@ -164,7 +190,6 @@ static int compare_edges(const edge_t &first_edge, const edge_t &second_edge)
            (first_edge.index_vertice_start == second_edge.index_vertice_start);
 }
 
-//возможно стоит перенести в другой файл
 int is_scene_init(const view_t &view)
 {
     return view.scene != nullptr;

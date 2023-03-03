@@ -24,7 +24,7 @@ void init_edges(edges_t &edges);
 int is_edges_init(const edges_t &edges);
 errors_t check_correct_edges(const edges_t &edges, const vertices_t &vertices);
 
-void allocate_edges(edges_t &edges);
+errors_t allocate_edges(edges_t &edges);
 void free_edges(edges_t &edges);
 
 errors_t draw_all_edges(const edges_t &edges, const vertices_t &vertices, const view_t &view);

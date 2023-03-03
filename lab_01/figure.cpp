@@ -1,10 +1,7 @@
 #include "figure.h"
 #include "errors.h"
 #include "task.h"
-#include <QDebug>
-#include <edges.h>
 #include <fstream>
-#include <vertices.h>
 
 figure_t &init_figure()
 {
@@ -100,6 +97,7 @@ errors_t draw_figure(view_t &view, const figure_t &figure)
 
     if (rc == ERR_OK)
     {
+        view.scene->addEllipse(0, 0, 1, 1);
         rc = draw_all_edges(figure.all_edge, figure.all_vertice, view);
     }
     return rc;

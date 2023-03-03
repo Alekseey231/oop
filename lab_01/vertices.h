@@ -14,7 +14,7 @@ struct vertices_t
 
 errors_t input_all_vertices(std::ifstream &in, vertices_t &vertices);
 
-void allocate_vertices(vertices_t &vertices);
+errors_t allocate_vertices(vertices_t &vertices);
 void free_vertices(vertices_t &vertices);
 
 void init_vertices(vertices_t &vertices);
