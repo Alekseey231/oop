@@ -18,7 +18,8 @@ enum errors_t
     ERR_INDEX_EDGE_TOO_LARGE,
     ERR_DUBLICATE_EDGE,
     ERR_ALLOCATE_MEM,
-    ERR_INCORRECT_COUNT
+    ERR_INCORRECT_COUNT,
+    ERR_INCORRECT_TASK_TYPE
 };
 void process_error(errors_t rc);
 

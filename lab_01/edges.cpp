@@ -1,16 +1,17 @@
+#include <QDebug>
 #include <cstring>
 #include <edges.h>
 #include <errors.h>
+#include <files.h>
 #include <fstream>
 
-static errors_t input_count_edges(std::ifstream &in, size_t &count);
-static errors_t input_edges(std::ifstream &in, edges_t &edges);
-static errors_t input_edge(std::ifstream &in, edge_t &edge);
-
-static void draw_edge(const edge_t &edge, const vertices_t &vertices, const view_t &view);
+static errors_t preprocess_input_edges(edges_t &edges, file_t &file);
+static errors_t input_count_edges(size_t &count, file_t &file);
+static errors_t input_edges(edges_t &edges, file_t &file);
+static errors_t input_one_edge(edge_t &edge, file_t &file);
 
 static errors_t check_index_edge(const size_t count_vertices, const edge_t &edge);
-static errors_t check_duplicate_edge(const edges_t &edges, const edge_t &edge);
+static errors_t check_duplicate_edge(const edges_t &edges, const size_t index);
 
 static int compare_edges(const edge_t &first_edge, const edge_t &second_edge);
 
@@ -20,76 +21,76 @@ void init_edges(edges_t &edges)
     edges.data = nullptr;
 }
 
-int is_edges_init(const edges_t &edges)
+int is_edges_init(const edge_t *edges)
 {
-    return edges.data != nullptr;
+    return edges != nullptr;
 }
 
-errors_t input_all_edges(std::ifstream &in, edges_t &edges)
+errors_t input_all_edges(edges_t &edges, file_t &file)
 {
     errors_t rc = ERR_OK;
-    if (is_edges_init(edges))
+    if (!is_file_open(file))
     {
-        rc = ERR_FIGURE_ALWAYS_INIT;
-    }
-    else if (!in.is_open())
-    {
-        rc = ERR_OPEN_FILE;
+        return ERR_OPEN_FILE;
     }
 
+    rc = preprocess_input_edges(edges, file);
     if (rc == ERR_OK)
     {
-        rc = input_count_edges(in, edges.count);
-        if (rc == ERR_OK)
+        rc = input_edges(edges, file);
+        if (rc != ERR_OK)
         {
-            rc = allocate_edges(edges);
-            if (rc == ERR_OK)
-            {
-                rc = input_edges(in, edges);
-            }
-            if (rc != ERR_OK)
-            {
-                free_edges(edges);
-            }
+            free_edges(edges);
+        }
+    }
+
+    return rc;
+}
+
+static errors_t preprocess_input_edges(edges_t &edges, file_t &file)
+{
+    errors_t rc = ERR_OK;
+    if (!is_file_open(file))
+    {
+        return ERR_OPEN_FILE;
+    }
+
+    rc = input_count_edges(edges.count, file);
+    if (rc == ERR_OK)
+    {
+        edges.data = (edge_t *)allocate_edges(edges.count);
+        if (edges.data == nullptr)
+        {
+            rc = ERR_ALLOCATE_MEM;
         }
     }
     return rc;
 }
 
-static errors_t input_count_edges(std::ifstream &in, size_t &count)
+static errors_t input_count_edges(size_t &count, file_t &file)
 {
     errors_t rc = ERR_OK;
-    if (!in.is_open())
+    if (!is_file_open(file))
     {
-        rc = ERR_OPEN_FILE;
-        return rc;
+        return ERR_OPEN_FILE;
     }
 
-    in >> count;
-    if (in.good())
+    //возможно надо считывать все же инт..
+    rc = read_unsigned(count, file);
+    if (rc == ERR_OK)
     {
-        if (count <= 1)
+        if (count < 1)
         {
             rc = ERR_INCORRECT_VALUE_EDGES;
         }
     }
-    else
-    {
-        rc = ERR_GET_VALUE;
-    }
-
     return rc;
 }
 
-errors_t allocate_edges(edges_t &edges)
+edge_t *allocate_edges(size_t count)
 {
-    errors_t rc = ERR_OK;
-    edges.data = (edge_t *)malloc(sizeof(edge_t) * edges.count);
-    if (edges.data == NULL)
-    {
-        rc = ERR_ALLOCATE_MEM;
-    }
-    return rc;
+    edge_t *data = (edge_t *)calloc(count, sizeof(edge_t));
+    return data;
 }
 
 void free_edges(edges_t &edges)
@@ -98,36 +99,37 @@ void free_edges(edges_t &edges)
     edges.data = nullptr;
 }
 
-static errors_t input_edges(std::ifstream &in, edges_t &edges)
+static errors_t input_edges(edges_t &edges, file_t &file)
 {
     errors_t rc = ERR_OK;
-    if (!in.is_open())
+    if (!is_file_open(file))
     {
-        rc = ERR_OPEN_FILE;
+        return ERR_OPEN_FILE;
     }
+    if (!is_edges_init(edges.data))
+    {
+        return ERR_NOT_INIT_EDGES;
+    }
+
     for (size_t i = 0; i < edges.count && rc == ERR_OK; ++i)
     {
-        rc = input_edge(in, edges.data[i]);
+        rc = input_one_edge(edges.data[i], file);
     }
     return rc;
 }
 
-static errors_t input_edge(std::ifstream &in, edge_t &edge)
+static errors_t input_one_edge(edge_t &edge, file_t &file)
 {
     errors_t rc = ERR_OK;
-    if (!in.is_open())
+    if (!is_file_open(file))
     {
-        rc = ERR_OPEN_FILE;
-        return rc;
+        return ERR_OPEN_FILE;
     }
-    in >> edge.index_vertice_start;
-    if (in.good())
+
+    rc = read_unsigned(edge.index_vertice_start, file);
+    if (rc == ERR_OK)
     {
-        in >> edge.index_vertice_end;
-    }
-    if (in.good() == 0)
-    {
-        rc = ERR_GET_VALUE;
+        rc = read_unsigned(edge.index_vertice_end, file);
     }
     return rc;
 }
@@ -135,9 +137,13 @@ static errors_t input_edge(std::ifstream &in, edge_t &edge)
 errors_t check_correct_edges(const edges_t &edges, const vertices_t &vertices)
 {
     errors_t rc = ERR_OK;
-    if (!is_edges_init(edges))
+    if (!is_edges_init(edges.data))
     {
-        rc = ERR_NOT_INIT_EDGES;
+        return ERR_NOT_INIT_EDGES;
+    }
+    if (!is_vertices_init(vertices.data))
+    {
+        return ERR_NOT_INIT_VERTICES;
     }
 
     for (size_t i = 0; i < edges.count && rc == ERR_OK; ++i)
@@ -145,7 +151,8 @@ errors_t check_correct_edges(const edges_t &edges, const vertices_t &vertices)
         rc = check_index_edge(vertices.count, edges.data[i]);
         if (rc == ERR_OK)
         {
-            rc = check_duplicate_edge(edges, edges.data[i]);
+            //не смешение ли уровней?
+            rc = check_duplicate_edge(edges, i);
         }
     }
     return rc;
@@ -153,29 +160,29 @@ errors_t check_correct_edges(const edges_t &edges, const vertices_t &vertices)
 
 static errors_t check_index_edge(const size_t count_vertices, const edge_t &edge)
 {
-    errors_t rc = ERR_OK;
     if ((edge.index_vertice_end > (count_vertices - 1)) || (edge.index_vertice_start > (count_vertices - 1)))
     {
-        rc = ERR_INDEX_EDGE_TOO_LARGE;
+        return ERR_INDEX_EDGE_TOO_LARGE;
     }
-    return rc;
+    return ERR_OK;
 }
 
-static errors_t check_duplicate_edge(const edges_t &edges, const edge_t &edge)
+static errors_t check_duplicate_edge(const edges_t &edges, const size_t index)
 {
     errors_t rc = ERR_OK;
 
-    if (!is_edges_init(edges))
+    if (!is_edges_init(edges.data))
     {
         rc = ERR_NOT_INIT_EDGES;
     }
     unsigned int count_replay = 0;
     for (size_t i = 0; i < edges.count && rc == ERR_OK; ++i)
     {
-        if (compare_edges(edge, edges.data[i]))
+        if (compare_edges(edges.data[index], edges.data[i]))
         {
             ++count_replay;
         }
+
         if (count_replay == 2)
         {
             rc = ERR_DUBLICATE_EDGE;
@@ -188,31 +195,4 @@ static int compare_edges(const edge_t &first_edge, const edge_t &second_edge)
 {
     return (first_edge.index_vertice_end == second_edge.index_vertice_end) &&
            (first_edge.index_vertice_start == second_edge.index_vertice_start);
-}
-
-int is_scene_init(const view_t &view)
-{
-    return view.scene != nullptr;
-}
-
-errors_t draw_all_edges(const edges_t &edges, const vertices_t &vertices, const view_t &view)
-{
-    errors_t rc = ERR_OK;
-    if (is_scene_init(view) == 0)
-    {
-        rc = ERR_NOT_INIT_SCENE;
-    }
-
-    for (size_t i = 0; rc == ERR_OK && i < edges.count; ++i)
-    {
-        draw_edge(edges.data[i], vertices, view);
-    }
-    return rc;
-}
-
-static void draw_edge(const edge_t &edge, const vertices_t &vertices, const view_t &view)
-{
-    point_t &first_point = vertices.data[edge.index_vertice_start];
-    point_t &end_point = vertices.data[edge.index_vertice_end];
-    view.scene->addLine(first_point.x, first_point.y, end_point.x, end_point.y);
 }

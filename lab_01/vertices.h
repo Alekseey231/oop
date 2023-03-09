@@ -12,18 +12,19 @@ struct vertices_t
     size_t count;
 };
 
-errors_t input_all_vertices(std::ifstream &in, vertices_t &vertices);
+errors_t input_all_vertices(vertices_t &vertices, file_t &file);
 
-errors_t allocate_vertices(vertices_t &vertices);
+point_t *allocate_vertices(size_t count);
 void free_vertices(vertices_t &vertices);
 
 void init_vertices(vertices_t &vertices);
-int is_vertices_init(const vertices_t &vertices);
+int is_vertices_init(const point_t *points);
+// int is_vertices_init(const vertices_t &vertices);
 
-void move_point(point_t &point, const point_t &center, const transformation_t &transform);
-void rotate_point(point_t &point, const point_t &center, const transformation_t &transform);
-void scale_point(point_t &point, const point_t &center, const transformation_t &transform);
+void move_point(point_t &point, const transformation_t &transform);
+void rotate_point(point_t &point, const transformation_t &transform);
+void scale_point(point_t &point, const transformation_t &transform);
 
-errors_t transform_all_vertices(vertices_t &vertices, const transformation_parametrs_t &param_transform,
-                                void (*transform)(point_t &, const point_t &, const transformation_t &));
+errors_t transform_all_vertices(vertices_t &vertices, const transformation_t &param_transform,
+                                void (*transform)(point_t &, const transformation_t &));
 #endif // VERTICES_H

@@ -1,8 +1,10 @@
 #ifndef TASK_H
 #define TASK_H
 
+#include "files.h"
 #include <QGraphicsScene>
 #include <errors.h>
+#include <fstream>
 #include <iostream>
 #include <point.h>
 
@@ -26,12 +28,7 @@ struct transformation_t
 struct transformation_parametrs_t
 {
     transformation_t transform;
-    point_t center;
-};
-
-struct file_t
-{
-    std::string path_to_file;
+    transformation_t center;
 };
 
 struct view_t
@@ -42,7 +39,7 @@ struct view_t
 struct task_t
 {
     enum types_task type;
-    file_t file;
+    file_name_t file;
     view_t view;
     transformation_parametrs_t transformation_param;
 };

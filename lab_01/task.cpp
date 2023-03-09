@@ -1,4 +1,5 @@
 #include "task.h"
+#include "draw.h"
 #include "error.h"
 #include "figure.h"
 #include "vertices.h"
@@ -15,23 +16,26 @@ errors_t process_event(task_t &task)
     switch (task.type)
     {
     case READ_FILE:
-        delete_figure(figure);
-        rc = input_figure(task.file, figure);
+        rc = load_figure(figure, task.file);
         break;
     case DRAW:
-        rc = draw_figure(task.view, figure);
+        rc = draw_figure(figure, task.view);
         break;
     case TRANSFORM:
-        rc = transform_figure(figure, task.transformation_param, move_point);
+        rc = transform_figure(figure, task.transformation_param.transform, move_point);
         break;
     case ROTATE:
-        rc = transform_figure(figure, task.transformation_param, rotate_point);
+        rc = rotate_figure(figure, task.transformation_param);
         break;
     case SCALE:
-        rc = transform_figure(figure, task.transformation_param, scale_point);
+        rc = scale_figure(figure, task.transformation_param);
         break;
     case QUIT:
         delete_figure(figure);
+        break;
+    default:
+        rc = ERR_INCORRECT_TASK_TYPE;
+        break;
     }
     return rc;
 }
@@ -45,12 +49,7 @@ void init_task(task_t &task)
 static void set_defoult_transformation(transformation_parametrs_t &transformation)
 {
     set_defoult_transform(transformation.transform);
-    set_defoult_center(transformation.center);
-}
-
-static void set_defoult_center(point_t &center)
-{
-    center.x = center.y = center.z = 0;
+    set_defoult_transform(transformation.center);
 }
 
 static void set_defoult_transform(transformation_t &transform)

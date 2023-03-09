@@ -1,7 +1,11 @@
 #include "figure.h"
 #include "errors.h"
+#include "files.h"
 #include "task.h"
+#include <QDebug>
 #include <fstream>
+
+transformation_t &preprocess_center(transformation_t &center);
 
 figure_t &init_figure()
 {
@@ -11,114 +15,154 @@ figure_t &init_figure()
     return figure;
 }
 
-errors_t input_figure(file_t &file, figure_t &figure)
+int is_figure_init(const vertices_t &vertices, const edges_t &edges)
+{
+    return is_vertices_init(vertices.data) && is_edges_init(edges.data);
+}
+
+// out-param, var-param, input-param
+errors_t load_figure(figure_t &figure, file_name_t &filename)
 {
     errors_t rc = ERR_OK;
-
-    if (is_vertices_init(figure.all_vertice) || is_edges_init(figure.all_edge))
+    file_t file;
+    rc = open_file(file, filename);
+    if (rc == ERR_OK)
     {
-        rc = ERR_FIGURE_ALWAYS_INIT;
-        return rc;
-    }
+        figure_t temporary_figure;
 
-    std::ifstream in(file.path_to_file);
+        rc = input_figure(temporary_figure, file);
 
-    if (in.is_open())
-    {
-        rc = input_all_vertices(in, figure.all_vertice);
         if (rc == ERR_OK)
         {
-            rc = input_all_edges(in, figure.all_edge);
+            rc = check_correct_figure(temporary_figure);
             if (rc != ERR_OK)
             {
-                free_vertices(figure.all_vertice);
+                delete_figure(temporary_figure);
             }
-        }
-        in.close();
-
-        if (rc == ERR_OK)
-        {
-            rc = check_correct_figure(figure);
-            if (rc != ERR_OK)
+            else
             {
                 delete_figure(figure);
+                figure = temporary_figure;
             }
+            /*
+            rc = check_correct_figure(temporary_figure);
+            figure_t deleted_figure;
+            if (rc != ERR_OK)
+            {
+                deleted_figure = temporary_figure;
+            }
+            else
+            {
+                deleted_figure = figure;
+                figure = temporary_figure;
+            }
+            delete_figure(deleted_figure);
+             */
         }
+
+        close_file(file);
     }
-    else
+    return rc;
+}
+
+// out in
+errors_t input_figure(figure_t &figure, file_t &file)
+{
+    errors_t rc = ERR_OK;
+    if (!is_file_open(file))
     {
-        rc = ERR_OPEN_FILE;
+        return ERR_OPEN_FILE;
     }
 
+    rc = input_all_vertices(figure.all_vertice, file);
+
+    if (rc == ERR_OK)
+    {
+        rc = input_all_edges(figure.all_edge, file);
+        if (rc != ERR_OK)
+        {
+            free_vertices(figure.all_vertice);
+        }
+    }
     return rc;
 }
 
 errors_t check_correct_figure(const figure_t &figure)
 {
-    errors_t rc = ERR_OK;
-    if (!is_vertices_init(figure.all_vertice) || !is_edges_init(figure.all_edge))
+    if (!is_figure_init(figure.all_vertice, figure.all_edge))
     {
-        rc = ERR_NOT_INIT_FIGURE;
+        return ERR_NOT_INIT_FIGURE;
     }
-    else
+
+    return check_correct_edges(figure.all_edge, figure.all_vertice);
+}
+
+errors_t transform_figure(figure_t &figure, const transformation_t &param_transform,
+                          void (*transform)(point_t &, const transformation_t &))
+{
+    if (!is_figure_init(figure.all_vertice, figure.all_edge))
     {
-        rc = check_correct_edges(figure.all_edge, figure.all_vertice);
+        return ERR_NOT_INIT_FIGURE;
+    }
+
+    return transform_all_vertices(figure.all_vertice, param_transform, transform);
+}
+
+errors_t rotate_figure(figure_t &figure, const transformation_parametrs_t &param_transform)
+{
+    errors_t rc = ERR_OK;
+    if (!is_figure_init(figure.all_vertice, figure.all_edge))
+    {
+        return ERR_NOT_INIT_FIGURE;
+    }
+
+    transformation_t center_transform = param_transform.center;
+
+    rc = transform_figure(figure, preprocess_center(center_transform), move_point);
+    if (rc == ERR_OK)
+    {
+        rc = transform_figure(figure, param_transform.transform, rotate_point);
+    }
+    if (rc == ERR_OK)
+    {
+        rc = transform_figure(figure, preprocess_center(center_transform), move_point);
     }
     return rc;
 }
 
-errors_t transform_figure(figure_t &figure, const transformation_parametrs_t &param_transform,
-                          void (*transform)(point_t &, const point_t &, const transformation_t &))
+errors_t scale_figure(figure_t &figure, const transformation_parametrs_t &param_transform)
 {
     errors_t rc = ERR_OK;
-    if (is_edges_init(figure.all_edge) && is_vertices_init(figure.all_vertice))
+    if (!is_figure_init(figure.all_vertice, figure.all_edge))
     {
-        rc = transform_all_vertices(figure.all_vertice, param_transform, transform);
+        return ERR_NOT_INIT_FIGURE;
     }
-    else
+
+    transformation_t center_transform = param_transform.center;
+
+    rc = transform_figure(figure, preprocess_center(center_transform), move_point);
+    if (rc == ERR_OK)
     {
-        rc = ERR_NOT_INIT_FIGURE;
+        rc = transform_figure(figure, param_transform.transform, scale_point);
+    }
+    if (rc == ERR_OK)
+    {
+        rc = transform_figure(figure, preprocess_center(center_transform), move_point);
     }
     return rc;
 }
 
-// Нужна ли тут проверка инициализации полей?
-errors_t draw_figure(view_t &view, const figure_t &figure)
+//вынести в другой файл
+transformation_t &preprocess_center(transformation_t &center)
 {
-    errors_t rc = ERR_OK;
-    if (is_scene_init(view) == 0)
-    {
-        rc = ERR_NOT_INIT_SCENE;
-    }
-    if (rc == ERR_OK)
-    {
-        rc = clear_scene(view);
-    }
-
-    if (rc == ERR_OK)
-    {
-        view.scene->addEllipse(0, 0, 1, 1);
-        rc = draw_all_edges(figure.all_edge, figure.all_vertice, view);
-    }
-    return rc;
+    center.dx *= -1;
+    center.dy *= -1;
+    center.dz *= -1;
+    return center;
 }
 
 void delete_figure(figure_t &figure)
 {
     free_edges(figure.all_edge);
     free_vertices(figure.all_vertice);
-}
-
-errors_t clear_scene(view_t &view)
-{
-    errors_t rc = ERR_OK;
-    if (is_scene_init(view) == 0)
-    {
-        rc = ERR_NOT_INIT_SCENE;
-    }
-    else
-    {
-        view.scene->clear();
-    }
-    return rc;
 }

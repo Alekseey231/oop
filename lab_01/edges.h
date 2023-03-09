@@ -8,8 +8,8 @@
 
 struct edge_t
 {
-    unsigned index_vertice_start;
-    unsigned index_vertice_end;
+    size_t index_vertice_start;
+    size_t index_vertice_end;
 };
 
 struct edges_t
@@ -18,13 +18,14 @@ struct edges_t
     size_t count;
 };
 
-errors_t input_all_edges(std::ifstream &in, edges_t &edges);
+errors_t input_all_edges(edges_t &edges, file_t &file);
 void init_edges(edges_t &edges);
 
-int is_edges_init(const edges_t &edges);
+// int is_edges_init(const edges_t &edges);
+int is_edges_init(const edge_t *edges);
 errors_t check_correct_edges(const edges_t &edges, const vertices_t &vertices);
 
-errors_t allocate_edges(edges_t &edges);
+edge_t *allocate_edges(size_t count);
 void free_edges(edges_t &edges);
 
 errors_t draw_all_edges(const edges_t &edges, const vertices_t &vertices, const view_t &view);

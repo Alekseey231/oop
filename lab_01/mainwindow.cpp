@@ -30,7 +30,7 @@ void MainWindow::on_load_file_clicked()
     task.type = READ_FILE;
     task.view.scene = ui->graphicsView->scene();
     QString filename = QFileDialog::getOpenFileName(0, "Open", "../lab_01/", "*.txt");
-    task.file.path_to_file = filename.toStdString();
+    task.file.name = filename.toStdString();
     if (filename.length() != 0)
     {
         errors_t rc = process_event(task);

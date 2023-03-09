@@ -50,5 +50,10 @@ void process_error(errors_t rc)
     case ERR_NOT_INIT_VERTICES:
         QMessageBox::critical(NULL, "Error", "Возникла ошибка: вершины не инициализированны");
         break;
+    case ERR_OK:
+        break;
+    default:
+        QMessageBox::critical(NULL, "Error", "Возникла неизвестная ошибка..");
+        break;
     }
 }
