@@ -21,6 +21,7 @@ int is_figure_init(const vertices_t &vertices, const edges_t &edges);
 void delete_figure(figure_t &figure);
 errors_t rotate_figure(figure_t &figure, const transformation_parametrs_t &param_transform);
 errors_t scale_figure(figure_t &figure, const transformation_parametrs_t &param_transform);
+errors_t move_figure(figure_t &figure, const transformation_parametrs_t &param_transform);
 
 errors_t transform_figure(figure_t &figure, const transformation_t &param_transform,
                           void (*transform)(point_t &, const transformation_t &));

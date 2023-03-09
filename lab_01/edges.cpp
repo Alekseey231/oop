@@ -75,7 +75,6 @@ static errors_t input_count_edges(size_t &count, file_t &file)
         return ERR_OPEN_FILE;
     }
 
-    //возможно надо считывать все же инт..
     rc = read_unsigned(count, file);
     if (rc == ERR_OK)
     {
@@ -151,7 +150,6 @@ errors_t check_correct_edges(const edges_t &edges, const vertices_t &vertices)
         rc = check_index_edge(vertices.count, edges.data[i]);
         if (rc == ERR_OK)
         {
-            //не смешение ли уровней?
             rc = check_duplicate_edge(edges, i);
         }
     }

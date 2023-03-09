@@ -6,6 +6,7 @@
 #include <fstream>
 
 transformation_t &preprocess_center(transformation_t &center);
+void copy_figure(figure_t &dst, figure_t &src);
 
 figure_t &init_figure()
 {
@@ -31,38 +32,28 @@ errors_t load_figure(figure_t &figure, file_name_t &filename)
         figure_t temporary_figure;
 
         rc = input_figure(temporary_figure, file);
+        close_file(file);
 
         if (rc == ERR_OK)
         {
             rc = check_correct_figure(temporary_figure);
-            if (rc != ERR_OK)
+            if (rc == ERR_OK)
+            {
+                delete_figure(figure);
+                copy_figure(figure, temporary_figure);
+            }
+            else
             {
                 delete_figure(temporary_figure);
             }
-            else
-            {
-                delete_figure(figure);
-                figure = temporary_figure;
-            }
-            /*
-            rc = check_correct_figure(temporary_figure);
-            figure_t deleted_figure;
-            if (rc != ERR_OK)
-            {
-                deleted_figure = temporary_figure;
-            }
-            else
-            {
-                deleted_figure = figure;
-                figure = temporary_figure;
-            }
-            delete_figure(deleted_figure);
-             */
         }
-
-        close_file(file);
     }
     return rc;
+}
+
+void copy_figure(figure_t &dst, figure_t &src)
+{
+    dst = src;
 }
 
 // out in
@@ -97,15 +88,14 @@ errors_t check_correct_figure(const figure_t &figure)
     return check_correct_edges(figure.all_edge, figure.all_vertice);
 }
 
-errors_t transform_figure(figure_t &figure, const transformation_t &param_transform,
-                          void (*transform)(point_t &, const transformation_t &))
+errors_t move_figure(figure_t &figure, const transformation_parametrs_t &param_transform)
 {
     if (!is_figure_init(figure.all_vertice, figure.all_edge))
     {
         return ERR_NOT_INIT_FIGURE;
     }
 
-    return transform_all_vertices(figure.all_vertice, param_transform, transform);
+    return transform_figure(figure, param_transform.transform, move_point);
 }
 
 errors_t rotate_figure(figure_t &figure, const transformation_parametrs_t &param_transform)
@@ -150,6 +140,17 @@ errors_t scale_figure(figure_t &figure, const transformation_parametrs_t &param_
         rc = transform_figure(figure, preprocess_center(center_transform), move_point);
     }
     return rc;
+}
+
+errors_t transform_figure(figure_t &figure, const transformation_t &param_transform,
+                          void (*transform)(point_t &, const transformation_t &))
+{
+    if (!is_figure_init(figure.all_vertice, figure.all_edge))
+    {
+        return ERR_NOT_INIT_FIGURE;
+    }
+
+    return transform_all_vertices(figure.all_vertice, param_transform, transform);
 }
 
 //вынести в другой файл

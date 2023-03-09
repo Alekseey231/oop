@@ -6,7 +6,6 @@
 
 static void set_defoult_transformation(transformation_parametrs_t &transformation);
 static void set_defoult_transform(transformation_t &transform);
-static void set_defoult_center(point_t &center);
 static void set_defoult_view(view_t &view);
 
 errors_t process_event(task_t &task)
@@ -22,7 +21,7 @@ errors_t process_event(task_t &task)
         rc = draw_figure(figure, task.view);
         break;
     case TRANSFORM:
-        rc = transform_figure(figure, task.transformation_param.transform, move_point);
+        rc = move_figure(figure, task.transformation_param);
         break;
     case ROTATE:
         rc = rotate_figure(figure, task.transformation_param);

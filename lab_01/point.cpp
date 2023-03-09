@@ -5,20 +5,18 @@
 static void rotate_point_z(point_t &point, const double angle);
 static void rotate_point_y(point_t &point, const double angle);
 static void rotate_point_x(point_t &point, const double angle);
+static void rotate_point(double &first_coord, double &second_coord, const double angle);
 
 static double scale_coordinate(double point, double scale_ratio);
 
 errors_t input_one_vertice(point_t &point, file_t &file)
 {
-    errors_t rc = ERR_OK;
     if (!is_file_open(file))
     {
         return ERR_OPEN_FILE;
     }
 
-    rc = read_coordinates(point.x, point.y, point.z, file);
-
-    return rc;
+    return read_coordinates(point.x, point.y, point.z, file);
 }
 
 void move_point(point_t &point, const transformation_t &transform)
@@ -33,7 +31,6 @@ static double to_radians(const double &angle)
     return angle * M_PI / 180;
 }
 
-//возможно угол стоит посчитать на верхнем уровне, и просто передавать вниз, чтобы сократить объем повторных вычислений
 void rotate_point(point_t &point, const transformation_t &transform)
 {
     rotate_point_x(point, transform.dx);
@@ -43,29 +40,26 @@ void rotate_point(point_t &point, const transformation_t &transform)
 
 static void rotate_point_x(point_t &point, const double angle)
 {
-    double rad_angle = to_radians(angle);
-    double saved_y = point.y;
-
-    point.y = point.y * cos(rad_angle) - point.z * sin(rad_angle);
-    point.z = saved_y * sin(rad_angle) + point.z * cos(rad_angle);
+    rotate_point(point.y, point.z, angle);
 }
 
 static void rotate_point_y(point_t &point, const double angle)
 {
-    double rad_angle = to_radians(angle);
-    double saved_x = point.x;
-
-    point.x = point.x * cos(rad_angle) - point.z * sin(rad_angle);
-    point.z = saved_x * sin(rad_angle) + point.z * cos(rad_angle);
+    rotate_point(point.x, point.z, angle);
 }
 
 static void rotate_point_z(point_t &point, const double angle)
 {
-    double rad_angle = to_radians(angle);
-    double saved_x = point.x;
+    rotate_point(point.x, point.y, angle);
+}
 
-    point.x = point.x * cos(rad_angle) - point.y * sin(rad_angle);
-    point.y = saved_x * sin(rad_angle) + point.y * cos(rad_angle);
+static void rotate_point(double &first_coord, double &second_coord, const double angle)
+{
+    double rad_angle = to_radians(angle);
+    double saved_first = first_coord;
+
+    first_coord = first_coord * cos(rad_angle) - second_coord * sin(rad_angle);
+    second_coord = saved_first * sin(rad_angle) + second_coord * cos(rad_angle);
 }
 
 void scale_point(point_t &point, const transformation_t &transform)
