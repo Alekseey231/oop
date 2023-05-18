@@ -1,0 +1,1 @@
+BaseVector::~BaseVector() = default;
