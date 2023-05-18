@@ -1,35 +1,34 @@
 #include <cmath>
 #include <point.h>
 
-Point::Point(const double x, const double y, const double z) : value_x(x), value_y(y), value_z(z)
-{}
+Point::Point(const double x, const double y, const double z) : data({{x,y,z,1}}) {}
 
 double Point::x() const noexcept
 {
-    return this->value_x;
+    return this->data[0][0];
 }
 
 double Point::y() const noexcept
 {
-    return this->value_z;
+    return this->data[0][1];
 }
 
 double Point::z() const noexcept
 {
-    return this->value_z;
+    return this->data[0][2];
 }
 
 void Point::set_x(const double x) noexcept
 {
-    this->value_x = x;
+    this->data[0][0] = x;
 }
 void Point::set_y(const double y) noexcept
 {
-    this->value_y = y;
+    this->data[0][1] = y;
 }
 void Point::set_z(const double z) noexcept
 {
-    this->value_z = z;
+    this->data[0][2] = z;
 }
 
 
@@ -78,6 +77,5 @@ Point Point::sub(const Point &point) const
 //подумать над оптимизацией передачи матриц
 Matrix<double> Point::transform(const Matrix<double> &matrix)
 {
-    Matrix<double> local_coordinate = {{this->x(), this->y(), this->z()}};
-    return local_coordinate * matrix;
+    return this->data * matrix;
 }

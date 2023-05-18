@@ -9,9 +9,9 @@ class Point
         Point() = default;
         Point(const double x, const double y, const double z);
 
-        explicit Point(const Point &point) noexcept = default;
+        explicit Point(const Point &point) = default;
 
-        Point &operator=(const Point &point) noexcept = default;
+        Point &operator=(const Point &point) = default;
 
         ~Point() = default;
 
@@ -38,10 +38,9 @@ class Point
         Matrix<double> Point::transform(const Matrix<double> &matrix);
 
     private:
-        double value_x;
-        double value_y;
-        double value_z;
+        Matrix<double> data{{0,0,0,1}};
 };
+
 
 
 #endif
