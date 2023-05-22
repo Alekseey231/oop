@@ -20,9 +20,3 @@ void Figure::addEdge(const Edge &edge)
 {
     this->all_edges.push_back(edge);
 }
-
-Matrix<double> Figure::transform_point(const Matrix<double> &matrix, std::size_t index)
-{
-    Point &point = this->all_points.at(index);
-    return point.transform(matrix);
-}
