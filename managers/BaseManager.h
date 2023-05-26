@@ -1,0 +1,4 @@
+#ifndef BASEMANAGER_H
+#define BASEMANAGER_H
+
+#endif // BASEMANAGER_H

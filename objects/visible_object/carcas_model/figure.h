@@ -3,8 +3,11 @@
 
 #include <vector>
 
+#include "../../../math/glm_wrapped.h"
 #include "edge.h"
-#include "point.h"
+//#include "point.h"
+
+typedef Vector4 Point;
 
 class Figure
 {

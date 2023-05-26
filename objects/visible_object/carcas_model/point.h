@@ -3,7 +3,7 @@
 
 #include "matrix/matrix/matrix.h"
 
-class Point
+/*class Point
 {
   public:
     Point() = default;
@@ -38,6 +38,6 @@ class Point
 
   private:
     Matrix<double> data{{0, 0, 0, 1}};
-};
+};*/
 
 #endif

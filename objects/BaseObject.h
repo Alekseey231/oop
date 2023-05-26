@@ -1,22 +1,27 @@
 #ifndef BASE_OBJECT
 #define BASE_OBJECT
 
+#include "../math/transformation.h"
 #include "../visitor/BaseVisitor.h"
+#include <map>
 #include <memory>
-#include <vector>
+
+class RotateVisitor;
+class ScaleVisitor;
+class TranslateVisitor;
 
 class BaseObject;
-using ObjectVector = std::vector<std::shared_ptr<BaseObject>>;
+using ObjectMap = std::map<std::size_t, std::shared_ptr<BaseObject>>;
 
 class BaseObject
 {
-    using value_type = BaseObject;
-    using size_type = size_t;
-    using iterator = ObjectVector::iterator;
-    using const_iterator = ObjectVector::const_iterator;
+    using value_type = ObjectMap::value_type;
+    using size_type = ObjectMap::size_type;
+    using iterator = ObjectMap ::iterator;
+    using const_iterator = ObjectMap ::const_iterator;
 
   public:
-    BaseObject() : id(current_id++){};
+    BaseObject() = default;
     virtual ~BaseObject() = default;
 
     virtual bool is_visible()
@@ -51,10 +56,16 @@ class BaseObject
     {
         return const_iterator();
     };
+    Matrix4 get_transform_matrix() const
+    {
+        return transform->get_matrix();
+    }
 
   protected:
-    std::size_t id;
-    static std::size_t current_id;
+    friend RotateVisitor;
+    friend ScaleVisitor;
+    friend TranslateVisitor;
+    std::shared_ptr<Transformation> transform = std::make_shared<Transformation>();
 };
 
 #endif

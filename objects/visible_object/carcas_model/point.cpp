@@ -1,6 +1,6 @@
 #include "point.h"
 #include <cmath>
-
+/*
 Point::Point(const double x, const double y, const double z) : data({{x, y, z, 1}})
 {
 }
@@ -75,4 +75,4 @@ Point Point::sub(const Point &point) const
 Matrix<double> Point::transform(const Matrix<double> &matrix)
 {
     this->data = this->data * matrix;
-}
+}*/
